@@ -24,6 +24,7 @@ export function SearchCommand() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchAnime[]>([]);
+  const [defaultResults, setDefaultResults] = useState<SearchAnime[]>([]);
   const { searchQuery, setSearchQuery } = useAnimeFilter();
 
   // Ctrl+K shortcut
@@ -38,6 +39,29 @@ export function SearchCommand() {
     return () => document.removeEventListener('keydown', down);
   }, []);
 
+  // Fetch a default "popular this season" list once, on first open
+  useEffect(() => {
+    if (!open || defaultResults.length > 0) return;
+    (async () => {
+      try {
+        const res = await fetch(
+          `https://api.jikan.moe/v4/seasons/now?limit=8&sfw=true&order_by=popularity`
+        );
+        const data = await res.json();
+        const list: SearchAnime[] = data.data ?? [];
+        const seen = new Set<number>();
+        const deduped = list.filter((anime) => {
+          if (seen.has(anime.mal_id)) return false;
+          seen.add(anime.mal_id);
+          return true;
+        });
+        setDefaultResults(deduped);
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+  }, [open, defaultResults.length]);
+
   // Fetch results as user types
   useEffect(() => {
     const timer = setTimeout(async () => {
@@ -47,13 +71,23 @@ export function SearchCommand() {
           `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=8&sfw=true`
         );
         const data = await res.json();
-        setResults(data.data ?? []);
+        const list: SearchAnime[] = data.data ?? [];
+        const seen = new Set<number>();
+        const deduped = list.filter((anime) => {
+          if (seen.has(anime.mal_id)) return false;
+          seen.add(anime.mal_id);
+          return true;
+        });
+        setResults(deduped);
       } catch (err) {
         console.error(err);
       }
     }, 400);
     return () => clearTimeout(timer);
   }, [query]);
+
+  const shownResults = query.trim() ? results : defaultResults;
+  const listHeading = query.trim() ? 'Anime' : 'Popular This Season';
 
   const handleSelect = (anime: SearchAnime) => {
     setSearchQuery(anime.title_english ?? anime.title);
@@ -110,14 +144,14 @@ export function SearchCommand() {
             <CommandEmpty>
               {query.trim() ? 'No anime found.' : 'Start typing to search...'}
             </CommandEmpty>
-            {results.length > 0 && (
-              <CommandGroup heading="Anime">
-                {results.map((anime) => (
+            {shownResults.length > 0 && (
+              <CommandGroup heading={listHeading}>
+                {shownResults.map((anime) => (
                   <CommandItem
                     key={anime.mal_id}
                     value={String(anime.mal_id)}
                     onSelect={() => handleSelect(anime)}
-                    className="flex items-center justify-between cursor-pointer rounded-none px-4 py-2.5"
+                    className="flex items-center justify-between cursor-pointer !rounded-none px-4 py-2.5"
                   >
                     <span className="text-sm">
                       {anime.title_english ?? anime.title}

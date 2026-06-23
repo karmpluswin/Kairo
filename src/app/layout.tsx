@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { poppins } from '@/lib/fonts';
 import ThemeProvider from '@/components/Providers/ThemeProvider';
 import { AnimeFilterProvider } from '@/components/Providers/AnimeFilterContext';
+import Footer from '@/components/Footer/Footer';
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -24,7 +25,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AnimeFilterProvider>
-            {children}
+            <div>
+              {children}
+            </div>
+            <Footer />
           </AnimeFilterProvider>
         </ThemeProvider>
       </body>

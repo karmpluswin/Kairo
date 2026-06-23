@@ -32,13 +32,14 @@ export default function AnimeCard({
       style={{ width: '500px', height: '288px' }}
     >
       {/* Poster — fixed 200px wide */}
-      <div className="relative shrink-0" style={{ width: '200px' }}>
+      <div className="relative shrink-0 h-full" style={{ width: '200px' }}>
         <Image
           src={image}
           alt={title}
           fill
+          quality={90}
           className="object-cover rounded-l-xl"
-          sizes="200px"
+          sizes="(min-width: 0px) 400px"
         />
       </div>
 
