@@ -1,32 +1,32 @@
-'use client';
+"use client";
 
-import { useState, useMemo } from 'react';
-import { Anime } from '@/types/anime';
-import AnimeCard from './AnimeCard';
-import { ITEMS_PER_PAGE } from '@/lib/constants';
-import { useAnimeFilter } from '@/components/Providers/AnimeFilterContext';
+import { useState, useMemo } from "react";
+import { Anime } from "@/types/anime";
+import AnimeCard from "./AnimeCard";
+import { useAnimeFilter } from "@/components/Providers/AnimeFilterContext";
 import {
-  Pagination, PaginationContent, PaginationItem,
-  PaginationLink, PaginationNext, PaginationPrevious,
-} from '@/components/ui/pagination';
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const AnimeGrid = ({ initialAnimePages }: { initialAnimePages: Anime[][] }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const { selectedGenre, searchQuery } = useAnimeFilter();
 
   // Flatten all pages for filtering
-  const allAnime = useMemo(
-    () => initialAnimePages.flat(),
-    [initialAnimePages]
-  );
+  const allAnime = useMemo(() => initialAnimePages.flat(), [initialAnimePages]);
 
   // Apply genre + search filters
   const filtered = useMemo(() => {
     let list = allAnime;
 
-    if (selectedGenre !== 'All') {
+    if (selectedGenre !== "All") {
       list = list.filter((a) =>
-        a.genres?.some((g) => g.name === selectedGenre)
+        a.genres?.some((g) => g.name === selectedGenre),
       );
     }
 
@@ -35,14 +35,15 @@ const AnimeGrid = ({ initialAnimePages }: { initialAnimePages: Anime[][] }) => {
       list = list.filter(
         (a) =>
           a.title.toLowerCase().includes(q) ||
-          (a.title_english ?? '').toLowerCase().includes(q)
+          (a.title_english ?? "").toLowerCase().includes(q),
       );
     }
 
     return list;
   }, [allAnime, selectedGenre, searchQuery]);
 
-  // Re-chunk filtered results into pages
+  // Re-chunk filtered results into pages of 24
+  const ITEMS_PER_PAGE = 24;
   const pages = useMemo(() => {
     const chunks: Anime[][] = [];
     for (let i = 0; i < filtered.length; i += ITEMS_PER_PAGE) {
@@ -59,11 +60,29 @@ const AnimeGrid = ({ initialAnimePages }: { initialAnimePages: Anime[][] }) => {
   return (
     <div className="flex flex-col items-center gap-4 w-full">
       {/* Filter active indicator */}
-      {(selectedGenre !== 'All' || searchQuery) && (
+      {(selectedGenre !== "All" || searchQuery) && (
         <p className="text-sm text-muted-foreground">
-          Showing <span className="text-foreground font-medium">{filtered.length}</span> results
-          {selectedGenre !== 'All' && <> for <span className="text-green-500 font-medium">{selectedGenre}</span></>}
-          {searchQuery && <> matching <span className="text-green-500 font-medium">"{searchQuery}"</span></>}
+          Showing{" "}
+          <span className="text-foreground font-medium">{filtered.length}</span>{" "}
+          results
+          {selectedGenre !== "All" && (
+            <>
+              {" "}
+              for{" "}
+              <span className="text-green-500 font-medium">
+                {selectedGenre}
+              </span>
+            </>
+          )}
+          {searchQuery && (
+            <>
+              {" "}
+              matching{" "}
+              <span className="text-green-500 font-medium">
+                "{searchQuery}"
+              </span>
+            </>
+          )}
         </p>
       )}
 
@@ -78,21 +97,32 @@ const AnimeGrid = ({ initialAnimePages }: { initialAnimePages: Anime[][] }) => {
       )}
 
       {totalPages > 1 && (
-        <Pagination className="mb-8">
+        <Pagination>
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
                 onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
-                className={safePage === 0 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-              />
+                className={
+                  safePage === 0
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
+                }
+              >
+                Previous
+              </PaginationPrevious>
             </PaginationItem>
 
             {[...Array(totalPages)].map((_, index) => (
-              <PaginationItem key={`page-${index + 1}`} className="hidden md:block">
+              <PaginationItem
+                key={`page-${index + 1}`}
+                className="hidden md:block"
+              >
                 <PaginationLink
                   onClick={() => setCurrentPage(index)}
                   isActive={safePage === index}
-                  className={safePage === index ? 'bg-accent' : 'cursor-pointer'}
+                  className={
+                    safePage === index ? "bg-accent" : "cursor-pointer"
+                  }
                 >
                   {index + 1}
                 </PaginationLink>
@@ -101,9 +131,17 @@ const AnimeGrid = ({ initialAnimePages }: { initialAnimePages: Anime[][] }) => {
 
             <PaginationItem>
               <PaginationNext
-                onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
-                className={safePage === totalPages - 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-              />
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(totalPages - 1, p + 1))
+                }
+                className={
+                  safePage === totalPages - 1
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
+                }
+              >
+                Next
+              </PaginationNext>
             </PaginationItem>
           </PaginationContent>
         </Pagination>

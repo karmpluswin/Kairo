@@ -21,20 +21,21 @@ export const POPULAR_PINNED_MAL_IDS = [
   16498,  // Attack on Titan
   1535,   // Death Note
   40748,  // Jujutsu Kaisen
-  38000,  // Demon Slayer: Kimetsu no Yaiba
-  5114,   // Fullmetal Alchemist: Brotherhood
-  44511,  // Chainsaw Man
-  30276,  // One Punch Man
-  21459,  // Mob Psycho 100
   34572,  // Black Clover
-  37991,  // Dr. Stone
-  37521,  // Vinland Saga
+  49596,  // Tomodachi Game
   11757,  // Sword Art Online
-  23273,  // Haikyuu!!
-  1575,   // Code Geass
-  9253,   // Steins;Gate
-  20507,  // Noragami
-  39659,  // Re:Zero
-  48569,  // 86
+  50273,  // Sousou no Frieren
+  50265,  // Oshi no Ko
+  57334,  // Dandadan
+  40456,  // Bocchi the Rock
   49458,  // Blue Lock
+  48583,  // Spy x Family
+  50739,  // Hell's Paradise
+  51009,  // Vinland Saga Season 2
+  41025,  // Mushoku Tensei
+  40028,  // Kimetsu no Yaiba Movie: Mugen Ressha-hen
+  35849,  // Violet Evergarden
+  32281,  // Kimi no Na wa (Your Name)
+  28851,  // Koe no Katachi (A Silent Voice)
+  9253,   // Steins;Gate
 ] as const;
