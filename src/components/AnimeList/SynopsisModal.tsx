@@ -10,17 +10,23 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Book } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface SynopsisModalProps {
   title: string;
   synopsis?: string | null;
+  className?: string;
 }
 
-export function SynopsisModal({ title, synopsis = 'N/A' }: SynopsisModalProps) {
+export function SynopsisModal({
+  title,
+  synopsis = 'N/A',
+  className,
+}: SynopsisModalProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="w-full">
+        <Button variant="outline" size="sm" className={cn('w-full', className)}>
           <Book className="h-3 w-3" /> Read Synopsis
         </Button>
       </DialogTrigger>

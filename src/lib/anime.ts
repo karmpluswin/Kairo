@@ -1,7 +1,7 @@
 import { Anime, AnimeResponse } from '@/types/anime';
+import { ITEMS_PER_PAGE } from '@/lib/constants';
 
 const JIKAN_BASE = 'https://api.jikan.moe/v4';
-const ITEMS_PER_PAGE = 24;
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -96,4 +96,37 @@ export const getTopAnime = async (count = 10): Promise<Anime[]> => {
   }
 
   return result.slice(0, count);
+};
+
+const fetchAnimeByIdWithRetry = async (
+  id: number,
+  retries = 3
+): Promise<Anime | null> => {
+  const url = `${JIKAN_BASE}/anime/${id}`;
+  const res = await fetch(url, { next: { revalidate: 3600 } });
+
+  if (res.status === 429) {
+    if (retries > 0) {
+      await delay(1000);
+      return fetchAnimeByIdWithRetry(id, retries - 1);
+    }
+    return null;
+  }
+
+  if (!res.ok) return null;
+  const { data } = await res.json();
+  return data;
+};
+
+/** Fetch specific titles by MAL id — used to pin favourites on page 1. */
+export const getAnimeByIds = async (ids: readonly number[]): Promise<Anime[]> => {
+  const result: Anime[] = [];
+
+  for (const id of ids) {
+    await delay(350);
+    const anime = await fetchAnimeByIdWithRetry(id);
+    if (anime) result.push(anime);
+  }
+
+  return result;
 };

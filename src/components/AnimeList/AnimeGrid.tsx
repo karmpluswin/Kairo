@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { Anime } from '@/types/anime';
 import AnimeCard from './AnimeCard';
+import { ITEMS_PER_PAGE } from '@/lib/constants';
 import { useAnimeFilter } from '@/components/Providers/AnimeFilterContext';
 import {
   Pagination, PaginationContent, PaginationItem,
@@ -41,8 +42,7 @@ const AnimeGrid = ({ initialAnimePages }: { initialAnimePages: Anime[][] }) => {
     return list;
   }, [allAnime, selectedGenre, searchQuery]);
 
-  // Re-chunk filtered results into pages of 24
-  const ITEMS_PER_PAGE = 24;
+  // Re-chunk filtered results into pages
   const pages = useMemo(() => {
     const chunks: Anime[][] = [];
     for (let i = 0; i < filtered.length; i += ITEMS_PER_PAGE) {
@@ -70,7 +70,7 @@ const AnimeGrid = ({ initialAnimePages }: { initialAnimePages: Anime[][] }) => {
       {currentAnime.length === 0 ? (
         <p className="text-muted-foreground mt-16 text-lg">No anime found.</p>
       ) : (
-        <main className="grid grid-cols-1 place-items-center justify-center items-start lg:grid-cols-2 2xl:grid-cols-3 gap-3 mb-4 mx-2">
+        <main className="grid grid-cols-1 place-items-center justify-center items-start lg:grid-cols-2 2xl:grid-cols-3 gap-3 mb-4 mx-2 w-full max-w-[1600px] px-2 sm:px-4">
           {currentAnime.map((anime) => (
             <AnimeCard key={anime.mal_id} {...anime} />
           ))}

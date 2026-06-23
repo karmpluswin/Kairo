@@ -1,38 +1,31 @@
-import { getAnimeList, getTopAnime } from '@/lib/anime';
-import { Anime } from '@/types/anime';
+import { getAnimeList, getAnimeByIds } from '@/lib/anime';
+import { POPULAR_PINNED_MAL_IDS } from '@/lib/constants';
 import AnimeGrid from './AnimeGrid';
 
-// How many famous all-time titles to pin into page 1.
-const POPULAR_PINNED_COUNT = 6;
+const ITEMS_PER_PAGE = 24;
 
 const AnimeList = async () => {
-  const [seasonalPages, topAnime] = await Promise.all([
+  const [seasonalPages, pinnedAnime] = await Promise.all([
     getAnimeList(),
-    getTopAnime(POPULAR_PINNED_COUNT),
+    getAnimeByIds(POPULAR_PINNED_MAL_IDS),
   ]);
 
-  const seasonal = seasonalPages.flat();
-  const seasonalIds = new Set(seasonal.map((a) => a.mal_id));
+  const pinnedIds = new Set<number>(POPULAR_PINNED_MAL_IDS);
 
-  // Avoid duplicating a title that's both this season AND all-time popular
-  const popularOnly = topAnime.filter((a) => !seasonalIds.has(a.mal_id));
+  // Drop pinned titles from seasonal so they only appear once at the front
+  const seasonal = seasonalPages
+    .flat()
+    .filter((a) => !pinnedIds.has(a.mal_id));
 
-  const ITEMS_PER_PAGE = 24;
-
-  // Page 1 = popular titles first (in fixed order), then seasonal titles
-  // fill the rest of the page. No shuffling — the famous titles should
-  // be the literal first cards a visitor sees.
   const firstPageSeasonalSlots = Math.max(
     0,
-    ITEMS_PER_PAGE - popularOnly.length
+    ITEMS_PER_PAGE - pinnedAnime.length
   );
-  const page1Seasonal = seasonal.slice(0, firstPageSeasonalSlots);
-  const page1 = [...popularOnly, ...page1Seasonal];
+  const page1 = [...pinnedAnime, ...seasonal.slice(0, firstPageSeasonalSlots)];
 
-  // Remaining pages = pure seasonal, continuing right after what page 1 used
   const remainingSeasonal = seasonal.slice(firstPageSeasonalSlots);
 
-  const animeShows: Anime[][] = [page1];
+  const animeShows = [page1];
   for (let i = 0; i < remainingSeasonal.length; i += ITEMS_PER_PAGE) {
     animeShows.push(remainingSeasonal.slice(i, i + ITEMS_PER_PAGE));
   }
