@@ -32,6 +32,19 @@ export interface AnimeBroadcast {
   string: string | null;
 }
 
+export interface AnimeStudio {
+  mal_id: number;
+  name: string;
+  type: string;
+  url: string;
+}
+
+export enum AnimeStatus {
+  NOT_YET_AIRED = 'Not yet aired',
+  CURRENTLY_AIRING = 'Currently Airing',
+  FINISHED_AIRING = 'Finished Airing',
+}
+
 export interface Anime {
   mal_id: number;
   title: string;
@@ -40,7 +53,7 @@ export interface Anime {
   images: AnimeImages;
   trailer: AnimeTrailer;
   episodes: number | null;
-  status: string;
+  status: AnimeStatus;
   score: number | null;
   scored_by: number | null;
   rank: number | null;
@@ -49,7 +62,12 @@ export interface Anime {
   year: number | null;
   broadcast: AnimeBroadcast;
   genres: AnimeGenre[];
+  studios: AnimeStudio[];
   airing: boolean;
+  aired: {
+    string?: string;
+  };
+  type: string;
 }
 
 export interface Pagination {
@@ -66,4 +84,10 @@ export interface Pagination {
 export interface AnimeResponse {
   data: Anime[];
   pagination: Pagination;
+}
+
+export interface TimeUnits {
+  days: number;
+  hours: number;
+  minutes: number;
 }

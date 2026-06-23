@@ -1,78 +1,56 @@
-import type { AnimeResponse } from '@/types/anime';
+import { Anime, AnimeResponse } from '@/types/anime';
 
 const JIKAN_BASE = 'https://api.jikan.moe/v4';
+const ITEMS_PER_PAGE = 24;
 
-// Genre name → Jikan genre ID mapping
-const GENRE_IDS: Record<string, number> = {
-  'Action': 1,
-  'Adventure': 2,
-  'Avant Garde': 5,
-  'Boys Love': 28,
-  'Comedy': 4,
-  'Drama': 8,
-  'Ecchi': 9,
-  'Fantasy': 10,
-  'Girls Love': 26,
-  'Gourmet': 47,
-  'Horror': 14,
-  'Mystery': 7,
-  'Romance': 22,
-  'Sci-Fi': 24,
-  'Slice of Life': 36,
-  'Sports': 30,
-  'Supernatural': 37,
-  'Suspense': 41,
-};
+const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-interface FetchSeasonalParams {
-  page?: number;
-  genre?: string;
-}
-
-export async function fetchSeasonalAnime({
-  page = 1,
-  genre = 'All',
-}: FetchSeasonalParams = {}): Promise<AnimeResponse> {
-  // Build URL
-  const params = new URLSearchParams({
-    page: String(page),
-    limit: '20',
-    filter: 'tv',          // TV series only, no movies/OVA
-    sfw: 'true',           // safe for work filter
-  });
-
-  if (genre !== 'All' && GENRE_IDS[genre]) {
-    params.set('genres', String(GENRE_IDS[genre]));
-  }
-
-  const url = `${JIKAN_BASE}/seasons/now?${params.toString()}`;
-
-  // Retry logic — Jikan has rate limits (3 req/sec)
-  // If we get 429, wait and retry once
-  const res = await fetch(url, {
-    next: { revalidate: 3600 }, // ISR — cache for 1 hour
-  });
+const fetchWithRetry = async (
+  page: number,
+  retries = 3
+): Promise<AnimeResponse> => {
+  const url = `${JIKAN_BASE}/seasons/now?page=${page}&limit=25&sfw=true`;
+  const res = await fetch(url, { next: { revalidate: 3600 } });
 
   if (res.status === 429) {
-    await new Promise((r) => setTimeout(r, 1000));
-    const retry = await fetch(url, { next: { revalidate: 3600 } });
-    if (!retry.ok) throw new Error(`Jikan API error: ${retry.status}`);
-    return retry.json();
+    if (retries > 0) {
+      await delay(1000);
+      return fetchWithRetry(page, retries - 1);
+    }
+    throw new Error('Rate limit exceeded after all retry attempts');
   }
 
   if (!res.ok) throw new Error(`Jikan API error: ${res.status}`);
   return res.json();
-}
+};
 
-export async function fetchAnimeById(id: number) {
-  const res = await fetch(`${JIKAN_BASE}/anime/${id}`, {
-    next: { revalidate: 3600 },
-  });
-  if (!res.ok) throw new Error(`Jikan API error: ${res.status}`);
-  return res.json();
-}
+export const getAnimeList = async (): Promise<Anime[][]> => {
+  const allAnime: Anime[] = [];
+  let page = 1;
+  let hasNextPage = true;
+  const seenIds = new Set<number>();
 
-// Helper — get display title (English preferred)
-export function getAnimeTitle(anime: { title: string; title_english: string | null }): string {
-  return anime.title_english ?? anime.title;
-}
+  while (hasNextPage) {
+    await delay(350);
+    const response = await fetchWithRetry(page);
+    const { data: anime, pagination } = response;
+
+    anime.forEach((show) => {
+      if (!seenIds.has(show.mal_id)) {
+        allAnime.push(show);
+        seenIds.add(show.mal_id);
+      }
+    });
+
+    hasNextPage = pagination.has_next_page;
+    page++;
+  }
+
+  // Chunk into pages of ITEMS_PER_PAGE
+  const chunked: Anime[][] = [];
+  for (let i = 0; i < allAnime.length; i += ITEMS_PER_PAGE) {
+    chunked.push(allAnime.slice(i, i + ITEMS_PER_PAGE));
+  }
+
+  return chunked;
+};

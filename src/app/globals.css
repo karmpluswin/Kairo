@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
 @theme {
+  /* Custom breakpoint */
+  --breakpoint-xs: 475px;
+
   /* Light mode */
   --color-background: hsl(0 0% 100%);
   --color-foreground: hsl(240 10% 3.9%);
@@ -21,6 +24,22 @@
   --color-input: hsl(240 5.9% 90%);
   --color-ring: hsl(142.1 76.2% 36.3%);
   --radius: 0.5rem;
+
+  /* Rainbow / Aurora color palette */
+  --color-1: hsl(0 100% 63%);
+  --color-2: hsl(270 100% 63%);
+  --color-3: hsl(210 100% 63%);
+  --color-4: hsl(195 100% 63%);
+  --color-5: hsl(90 100% 63%);
+
+  /* Animations */
+  --animate-rainbow: rainbow var(--speed, 2s) infinite linear;
+  --animate-aurora-border: aurora-border 3s ease-in-out infinite;
+  --animate-aurora-1: aurora-1 6s ease-in-out infinite alternate;
+  --animate-aurora-2: aurora-2 6s ease-in-out infinite alternate;
+  --animate-aurora-3: aurora-3 6s ease-in-out infinite alternate;
+  --animate-aurora-4: aurora-4 6s ease-in-out infinite alternate;
+  --animate-line-shadow: line-shadow 15s linear infinite;
 }
 
 .dark {
@@ -84,4 +103,47 @@ body {
   to {
     clip-path: polygon(171% 50%, 50% 171%, -50% 71%, 50% -71%);
   }
+}
+
+/* ─── Rainbow animation ─────────────────────────────────── */
+@keyframes rainbow {
+  0%   { background-position: 0%; }
+  100% { background-position: 200%; }
+}
+
+/* ─── Aurora animations ─────────────────────────────────── */
+@keyframes aurora-border {
+  0%, 100% { border-radius: 37% 29% 27% 27% / 28% 25% 41% 37%; }
+  25%       { border-radius: 47% 29% 39% 49% / 61% 19% 66% 26%; }
+  50%       { border-radius: 57% 23% 47% 72% / 63% 17% 66% 33%; }
+  75%       { border-radius: 28% 49% 29% 100% / 93% 20% 64% 25%; }
+}
+@keyframes aurora-1 {
+  0%   { top: 0;   right: 0; }
+  50%  { top: 10%; right: 50%; }
+  75%  { top: 0;   right: 25%; }
+  100% { top: 25%; right: 0; }
+}
+@keyframes aurora-2 {
+  0%   { top: -50%; left: 0; }
+  60%  { top: 25%;  left: 33%; }
+  100% { top: -50%; left: 0; }
+}
+@keyframes aurora-3 {
+  0%   { bottom: 0;   left: 0; }
+  40%  { bottom: 25%; left: 33%; }
+  80%  { bottom: 10%; left: 50%; }
+  100% { bottom: 0;   left: 0; }
+}
+@keyframes aurora-4 {
+  0%   { bottom: -50%; right: 0; }
+  50%  { bottom: 0;    right: 40%; }
+  90%  { bottom: 50%;  right: 25%; }
+  100% { bottom: -50%; right: 0; }
+}
+
+/* ─── Line shadow animation ─────────────────────────────── */
+@keyframes line-shadow {
+  0%   { background-position: 0    0; }
+  100% { background-position: -100% -100%; }
 }

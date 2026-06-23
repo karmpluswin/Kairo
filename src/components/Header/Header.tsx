@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { GitHubButton } from './GithubButton';
 import { SearchCommand } from './SearchCommand';
-import { FilterButton } from './FilterButton';
+// import { FilterButton } from './FilterButton';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 
 const Header = () => {
@@ -24,10 +24,10 @@ const Header = () => {
         {/* Actions */}
         <div className="flex gap-2 items-center">
           <SearchCommand />
-          <FilterButton
+          {/* <FilterButton
             selectedGenre={selectedGenre}
             onGenreChange={setSelectedGenre}
-          />
+          /> */}
           <GitHubButton repoUrl="https://github.com/karmpluswin/kairo" />
           <ThemeToggle />
         </div>
