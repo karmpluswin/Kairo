@@ -12,7 +12,12 @@ const Header = () => {
 
         <div className="flex items-center shrink-0">
           <h1 className="flex text-2xl font-bold whitespace-nowrap">
-            <span className="text-green-500 mr-1">Kairo</span>
+            <span
+  className="text-green-500 mr-1 text-5xl"
+  style={{ fontFamily: "var(--font-sukajan)" }}
+>
+  Kairo
+</span>
             {/* <span className="text-foreground">[カイロ]</span> */}
           </h1>
         </div>

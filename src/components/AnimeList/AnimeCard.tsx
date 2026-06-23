@@ -66,7 +66,7 @@ export default function AnimeCard({
             <span>
               {!score
                 ? 'N/A'
-                : `${score} (${scoredBy?.toLocaleString() ?? 0})`}
+                : `${score} (${scoredBy?.toLocaleString("en-US") ?? 0})`}
             </span>
           </div>
           <Countdown

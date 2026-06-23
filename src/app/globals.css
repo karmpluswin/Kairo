@@ -230,3 +230,25 @@ body {
 
 .rainbow-btn:focus-visible { outline: none; }
 .rainbow-btn:disabled { pointer-events: none; opacity: 0.5; }
+
+.font-minecraft {
+  font-family: var(--font-minecraft);
+}
+
+@font-face {
+  font-family: "Minecraft";
+  src: url("/fonts/Minecraft.ttf") format("truetype");
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.font-sukajan {
+  font-family: var(--font-sukajan);
+}

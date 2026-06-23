@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { poppins } from '@/lib/fonts';
+import { minecraft } from "@/lib/fonts";
+import { sukajan } from "@/lib/fonts";
 import ThemeProvider from '@/components/Providers/ThemeProvider';
 import { AnimeFilterProvider } from '@/components/Providers/AnimeFilterContext';
 import Footer from '@/components/Footer/Footer';
@@ -17,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${poppins.className} antialiased min-h-full flex flex-col`}>
+      <body className={`${poppins.className} ${minecraft.variable} ${sukajan.variable} antialiased min-h-full flex flex-col`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

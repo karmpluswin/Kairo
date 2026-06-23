@@ -67,9 +67,9 @@ export function FluidGradientText({
           strokeWidth="2"
           fill="url(#fluid_gradient_text_linear)"
           style={{
-            fontFamily: "Helvetica",
+            fontFamily: "Minecraft",
             fontSize: svgViewBoxHeight,
-            fontWeight: "bold",
+            // fontWeight: "bold",
           }}
         >
           {text}
