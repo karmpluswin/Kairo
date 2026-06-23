@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { poppins } from '@/lib/fonts';
 import ThemeProvider from '@/components/Providers/ThemeProvider';
+import { AnimeFilterProvider } from '@/components/Providers/AnimeFilterContext';
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -22,7 +23,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <AnimeFilterProvider>
+            {children}
+          </AnimeFilterProvider>
         </ThemeProvider>
       </body>
     </html>

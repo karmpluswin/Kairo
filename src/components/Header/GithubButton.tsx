@@ -22,7 +22,7 @@ export function GitHubButton({ repoUrl, className }: GitHubButtonProps) {
   w-9 h-9 md:h-10 md:w-auto md:gap-2 md:px-4 ${className ?? ''}`}
     >
       <Star
-        className={`w-4 h-4 transition-all duration-200 ${isHovered ? 'fill-white text-white' : ''}`}
+        className={`w-4 h-4 transition-all duration-200 ${isHovered ? 'fill-yellow-400 text-yellow-400' : ''}`}
       />
       {/* Text only on desktop */}
       <span className="hidden md:inline text-sm font-medium">GitHub</span>

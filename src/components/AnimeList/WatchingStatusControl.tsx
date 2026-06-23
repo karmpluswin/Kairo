@@ -24,27 +24,27 @@ const WatchingStatusControl: FC<WatchingStatusControlProps> = ({
   } = useAnimeWatching(title, totalEpisodes);
 
   return (
-    <div className="mt-2 w-full">
+    <div className="w-full">
       {isWatching ? (
-        <div className="w-full sm:max-w-xs space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="w-full">
+          <div className="flex items-center justify-between gap-2">
             <Button
               variant="outline"
               size="icon"
               onClick={decreaseWatched}
               disabled={watchedEpisodes === -1}
-              className="rounded-xl border-2 transition-colors hover:bg-primary hover:text-primary-foreground"
+              className="rounded-xl border-2 transition-colors hover:bg-primary hover:text-primary-foreground shrink-0"
             >
               <Minus className="h-4 w-4" />
               <span className="sr-only">Decrease</span>
             </Button>
-            <div className="min-w-[100px] text-center">
+            <div className="flex-1 text-center">
               <div className="font-medium tabular-nums text-sm">
                 {watchedEpisodes === totalEpisodes
                   ? 'Completed'
                   : `${watchedEpisodes} / ${totalEpisodes}`}
               </div>
-              <div className="relative h-1 overflow-hidden bg-muted">
+              <div className="relative h-1 overflow-hidden rounded-full bg-muted mt-1">
                 <div
                   className="absolute left-0 top-0 h-full rounded-full bg-primary transition-all duration-500 ease-out"
                   style={{ width: `${progress}%` }}
@@ -56,7 +56,7 @@ const WatchingStatusControl: FC<WatchingStatusControlProps> = ({
               size="icon"
               onClick={increaseWatched}
               disabled={watchedEpisodes === totalEpisodes}
-              className="rounded-xl border-2 transition-colors hover:bg-primary hover:text-primary-foreground"
+              className="rounded-xl border-2 transition-colors hover:bg-primary hover:text-primary-foreground shrink-0"
             >
               <Plus className="h-4 w-4" />
               <span className="sr-only">Increase</span>
@@ -64,12 +64,11 @@ const WatchingStatusControl: FC<WatchingStatusControlProps> = ({
           </div>
         </div>
       ) : (
-        <button
-  onClick={startWatching}
-  className="w-full h-9 flex items-center justify-center gap-2 rounded-lg border border-border bg-background text-foreground text-sm font-medium hover:bg-muted transition-colors"
->
-  <Eye className="h-4 w-4" /> Start Watching
-</button>
+        // RainbowButton: dark bg + white text in dark mode, white bg + dark text in light mode
+        // Rainbow animated border visible in both modes
+        <RainbowButton onClick={startWatching}>
+          <Eye className="h-4 w-4 mr-2" /> Start Watching
+        </RainbowButton>
       )}
     </div>
   );

@@ -147,3 +147,86 @@ body {
   0%   { background-position: 0    0; }
   100% { background-position: -100% -100%; }
 }
+
+/* ─── Aurora Text — colours show INSIDE letters only ──────── */
+.aurora-text-wrapper {
+  position: relative;
+  display: inline-flex;
+
+  /* Animate a moving gradient, clip it to the text shape */
+  background-image: linear-gradient(
+    90deg,
+    var(--color-1),
+    var(--color-3),
+    var(--color-2),
+    var(--color-4),
+    var(--color-1)
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+
+  animation: aurora-shift 4s ease-in-out infinite;
+}
+
+@keyframes aurora-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ─── Rainbow Button ─────────────────────────────────────── */
+.rainbow-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  background-size: 200%;
+  animation: rainbow 2s linear infinite;
+  border: 2px solid transparent;
+  background-clip: padding-box, border-box, border-box;
+  background-origin: border-box;
+
+  /* LIGHT MODE: dark fill + white text */
+  background-image:
+    linear-gradient(#09090b, #09090b),
+    linear-gradient(#09090b 50%, rgba(9,9,11,0.4) 80%, rgba(9,9,11,0)),
+    linear-gradient(90deg, var(--color-1), var(--color-5), var(--color-3), var(--color-4), var(--color-2));
+  color: #ffffff;
+}
+
+.dark .rainbow-btn {
+  /* DARK MODE: light fill + dark text */
+  background-image:
+    linear-gradient(#ffffff, #ffffff),
+    linear-gradient(#ffffff 50%, rgba(255,255,255,0.4) 80%, rgba(255,255,255,0)),
+    linear-gradient(90deg, var(--color-1), var(--color-5), var(--color-3), var(--color-4), var(--color-2));
+  color: #000000;
+}
+
+.rainbow-btn::before {
+  content: '';
+  position: absolute;
+  bottom: -20%;
+  left: 50%;
+  z-index: -1;
+  height: 20%;
+  width: 60%;
+  transform: translateX(-50%);
+  animation: rainbow 2s linear infinite;
+  background-size: 200%;
+  background-image: linear-gradient(90deg, var(--color-1), var(--color-5), var(--color-3), var(--color-4), var(--color-2));
+  filter: blur(0.8rem);
+}
+
+.rainbow-btn:focus-visible { outline: none; }
+.rainbow-btn:disabled { pointer-events: none; opacity: 0.5; }
