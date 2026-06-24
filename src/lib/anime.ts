@@ -4,7 +4,14 @@ const JIKAN_BASE = 'https://api.jikan.moe/v4';
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const fetchWithRetry = async (page: number, retries = 3): Promise<AnimeResponse> => {
-  const res = await fetch(`${JIKAN_BASE}/anime/${id}`);
+  const res = await fetch(
+  `${JIKAN_BASE}/seasons/now?page=${page}&limit=25&sfw=true`,
+  {
+    next: {
+      revalidate: 3600,
+    },
+  }
+);
   
   if (res.status === 429) {
     if (retries > 0) {
@@ -36,8 +43,14 @@ export const getAnimeByIdsClient = async (ids: readonly number[]): Promise<Anime
     const batch = ids.slice(i, i + 3);
     const batchResults = await Promise.allSettled(
       batch.map((id) =>
-        fetch(`${JIKAN_BASE}/anime/${id}`).then((r) => r.json()).then((d) => d.data as Anime)
-      )
+  fetch(`${JIKAN_BASE}/anime/${id}`, {
+    next: {
+      revalidate: 86400, // 24 hours
+    },
+  })
+    .then((r) => r.json())
+    .then((d) => d.data as Anime)
+)
     );
     batchResults.forEach((r) => {
       if (r.status === 'fulfilled' && r.value) result.push(r.value);
