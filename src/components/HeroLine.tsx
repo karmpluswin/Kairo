@@ -96,7 +96,7 @@ export function HeroLine() {
     <h2
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="text-center font-semibold leading-none text-4xl max-w-sm xs:text-6xl xs:max-w-xl lg:text-7xl w-full lg:max-w-5xl p-4 pt-0 my-4 cursor-default select-none"
+      className="text-center font-semibold leading-none text-3xl max-w-md xs:text-5xl xs:max-w-3xl lg:text-7xl w-full lg:max-w-5xl p-4 pt-0 my-4 cursor-default select-none"
       style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'baseline', gap: '0.25em' }}
     >
       {/* Your — magnified */}

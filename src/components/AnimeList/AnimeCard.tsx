@@ -14,6 +14,7 @@ export default function AnimeCard({
   type,
   broadcast,
   studios,
+  genres,
   score,
   scored_by: scoredBy,
   episodes: totalEpisodes,
@@ -90,7 +91,16 @@ export default function AnimeCard({
                 totalEpisodes={totalEpisodes}
               />
             ) : null}
-            <SynopsisModal title={title} synopsis={synopsis} />
+            <SynopsisModal
+              title={title_english ?? title}
+              synopsis={synopsis}
+              image={image}
+              type={type}
+              score={score}
+              scoredBy={scoredBy}
+              studios={joinedStudios}
+              genres={genres}
+            />
           </div>
         </div>
       </div>

@@ -25,7 +25,9 @@ export default function RootLayout({
             <div>
               {children}
             </div>
-            <Footer />
+            <div className="hidden lg:block">
+              <Footer />
+            </div>
           </AnimeFilterProvider>
         </ThemeProvider>
       </body>
