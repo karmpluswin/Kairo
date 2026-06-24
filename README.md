@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
+
+# Kairo カイロ
+
+**Track what's airing. Never miss a season.**
+
+A clean, fast seasonal anime tracker built with Next.js 15. Browse currently airing shows, discover all-time favorites, track your watch progress episode by episode, and filter by genre — all powered by the Jikan MAL API.
+
+![Next.js](https://img.shields.io/badge/Next.js_15-black?style=for-the-badge&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
+![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-000000?style=for-the-badge&logo=shadcnui&logoColor=white)
+
+</div>
+
+---
+
+## Features
+
+- **Seasonal Anime Feed** — current season shows fetched live from the Jikan MAL API, refreshed every hour
+- **Pinned Popular Titles** — all-time classics like Attack on Titan, Death Note, and Jujutsu Kaisen always at the top
+- **Watch Tracker** — mark shows as watching, track episode progress with + / − controls and a live progress bar
+- **Episode Countdown** — real-time countdown to the next episode for airing shows
+- **Search** — instant fuzzy search across all titles via a command palette
+- **Genre Filter** — filter by Action, Romance, Mystery, Sci-Fi, and 15+ other genres
+- **Synopsis Modal** — read the full synopsis and open the trailer without leaving the page
+- **Dark / Light Mode** — full theme support with system preference detection
+- **Responsive** — works on mobile, tablet, and desktop
+
+---
+
+## Tech Stack
+
+| | |
+|---|---|
+| Framework | Next.js 15 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS v4 |
+| Components | shadcn/ui + Radix UI |
+| Animations | Motion (Framer Motion) |
+| Data | Jikan API (MyAnimeList) |
+| Icons | Lucide React |
+| Package Manager | pnpm |
+
+---
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# Clone the repo
+git clone https://github.com/your-username/kairo.git
+
+cd kairo
+
+# Install dependencies
+pnpm install
+
+# Run the dev server
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project Structure
 
-## Learn More
+```
+src/
+├── app/              # Next.js app router (layout, page, globals.css)
+├── components/
+│   ├── AnimeList/    # AnimeCard, AnimeGrid, Countdown, SynopsisModal, WatchingStatusControl
+│   ├── Header/       # SearchCommand, FilterButton, GithubButton, ThemeToggle
+│   ├── Providers/    # ThemeProvider, AnimeFilterContext
+│   └── ui/           # shadcn/ui components
+├── hooks/            # useAnimeWatching
+├── lib/              # Jikan API client, constants, utils, fonts
+└── types/            # Anime types
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Data & Caching
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Anime data is fetched server-side from the [Jikan API](https://jikan.moe/) (unofficial MyAnimeList API) and revalidated every hour (`revalidate = 3600`). Watch progress is stored locally in `localStorage`.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+<div align="center">
+Made with ❤️ by Karmjeet and Special thanks to github.com/@ senbo1
+</div>
