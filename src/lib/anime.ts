@@ -48,15 +48,17 @@ export const getAnimeList = async (): Promise<Anime[][]> => {
   const seenIds = new Set<number>();
 
   for (let page = 1; page <= 4; page++) {
-    const { data: anime } = await fetchWithRetry(page);
+  const { data: anime } = await fetchWithRetry(page);
 
-    anime.forEach((show) => {
-      if (!seenIds.has(show.mal_id)) {
-        allAnime.push(show);
-        seenIds.add(show.mal_id);
-      }
-    });
-  }
+  anime.forEach((show) => {
+    if (!seenIds.has(show.mal_id)) {
+      allAnime.push(show);
+      seenIds.add(show.mal_id);
+    }
+  });
+
+  await delay(300);
+}
 
   const chunked: Anime[][] = [];
 

@@ -21,7 +21,6 @@ const AnimeGrid = ({
 }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [pinned, setPinned] = useState<Anime[]>([]);
-  const [pinnedLoaded, setPinnedLoaded] = useState(true);
   const { selectedGenre, searchQuery } = useAnimeFilter();
 
   useEffect(() => {
@@ -29,7 +28,6 @@ const AnimeGrid = ({
 
   getAnimeByIdsClient(pinnedIds).then((data) => {
     setPinned(data.filter(Boolean));
-    setPinnedLoaded(true);
   });
 }, [pinnedIds]);
 
@@ -65,14 +63,6 @@ const AnimeGrid = ({
   const safePage = Math.min(currentPage, pages.length - 1);
   const currentAnime = pages[safePage] ?? [];
   const totalPages = pages.length;
-
-  if (!pinnedLoaded) {
-    return (
-      <div className="flex items-center justify-center mt-16">
-        <p className="text-muted-foreground text-lg animate-pulse">Loading anime...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col items-center gap-4 w-full">
