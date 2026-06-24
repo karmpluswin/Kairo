@@ -15,7 +15,7 @@ const fetchWithRetry = async (page: number, retries = 3): Promise<AnimeResponse>
   
   if (res.status === 429) {
     if (retries > 0) {
-      await delay(500);
+      await delay(1000);
       return fetchWithRetry(page, retries - 1);
     }
     throw new Error('Rate limit exceeded after all retry attempts');
