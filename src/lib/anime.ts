@@ -26,28 +26,14 @@ const fetchWithRetry = async (page: number, retries = 3): Promise<AnimeResponse>
 };
 
 export const getAnimeList = async (): Promise<Anime[][]> => {
-  const allAnime: Anime[] = [];
-  let page = 1;
-  let hasNextPage = true;
-  const seenIds = new Set<number>();
-
-  while (hasNextPage) {
-    await delay(350);
-    const { data: anime, pagination } = await fetchWithRetry(page);
-    anime.forEach((show) => {
-      if (!seenIds.has(show.mal_id)) {
-        allAnime.push(show);
-        seenIds.add(show.mal_id);
-      }
-    });
-    hasNextPage = pagination.has_next_page;
-    page++;
-  }
+  const { data } = await fetchWithRetry(1);
 
   const chunked: Anime[][] = [];
-  for (let i = 0; i < allAnime.length; i += 24) {
-    chunked.push(allAnime.slice(i, i + 24));
+
+  for (let i = 0; i < data.length; i += 24) {
+    chunked.push(data.slice(i, i + 24));
   }
+
   return chunked;
 };
 
