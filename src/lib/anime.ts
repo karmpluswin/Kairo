@@ -4,7 +4,14 @@ const JIKAN_BASE = 'https://api.jikan.moe/v4';
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const fetchWithRetry = async (page: number, retries = 3): Promise<AnimeResponse> => {
-  const res = await fetch(`${JIKAN_BASE}/seasons/now?page=${page}&limit=25&sfw=true`);
+  const res = await fetch(
+  `${JIKAN_BASE}/seasons/now?page=${page}&limit=25&sfw=true`,
+  {
+    next: {
+      revalidate: 3600,
+    },
+  }
+);
   
   if (res.status === 429) {
     if (retries > 0) {

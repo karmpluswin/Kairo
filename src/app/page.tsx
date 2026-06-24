@@ -3,7 +3,6 @@ import AnimeList from '@/components/AnimeList/AnimeList';
 import { HeroLine } from '@/components/HeroLine';
 
 export const revalidate = 3600;
-export const dynamic = 'force-dynamic';
 
 export default function Home() {
   return (

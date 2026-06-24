@@ -25,14 +25,14 @@ export const POPULAR_PINNED_MAL_IDS = [
   49596,  // Tomodachi Game
   11757,  // Sword Art Online
   50273,  // Sousou no Frieren
-  50265,  // Oshi no Ko
+  52034,  // Oshi no Ko
   57334,  // Dandadan
-  40456,  // Bocchi the Rock
+  47917,  // Bocchi the Rock
   49458,  // Blue Lock
   48583,  // Spy x Family
   50739,  // Hell's Paradise
   51009,  // Vinland Saga Season 2
-  41025,  // Mushoku Tensei
+  39535,  // Mushoku Tensei
   40028,  // Kimetsu no Yaiba Movie: Mugen Ressha-hen
   35849,  // Violet Evergarden
   32281,  // Kimi no Na wa (Your Name)
