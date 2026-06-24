@@ -10,7 +10,7 @@ const fetchWithRetry = async (
   retries = 5
 ): Promise<AnimeResponse> => {
   const url = `${JIKAN_BASE}/seasons/now?page=${page}&limit=25&sfw=true`;
-  const res = await fetch(url, { cache: 'no-store' });
+  const res = await fetch(url, { next: { revalidate: 3600 } });
 
   if (res.status === 429) {
     if (retries > 0) {
@@ -24,9 +24,8 @@ const fetchWithRetry = async (
   return res.json();
 };
 
-// in-memory cache so Jikan is only hit once per server instance
 let cache: { data: Anime[][]; timestamp: number } | null = null;
-const CACHE_TTL = 1000 * 60 * 60; // 1 hour
+const CACHE_TTL = 1000 * 60 * 60;
 
 export const getAnimeList = async (): Promise<Anime[][]> => {
   if (cache && Date.now() - cache.timestamp < CACHE_TTL) {
@@ -68,7 +67,7 @@ const fetchTopWithRetry = async (
   retries = 3
 ): Promise<AnimeResponse> => {
   const url = `${JIKAN_BASE}/top/anime?page=${page}&limit=10&filter=bypopularity&sfw=true`;
-  const res = await fetch(url, { cache: 'no-store' });
+  const res = await fetch(url, { next: { revalidate: 3600 } });
 
   if (res.status === 429) {
     if (retries > 0) {
@@ -109,7 +108,7 @@ const fetchAnimeByIdWithRetry = async (
   retries = 3
 ): Promise<Anime | null> => {
   const url = `${JIKAN_BASE}/anime/${id}`;
-  const res = await fetch(url, { cache: 'no-store' });
+  const res = await fetch(url, { next: { revalidate: 3600 } });
 
   if (res.status === 429) {
     if (retries > 0) {
