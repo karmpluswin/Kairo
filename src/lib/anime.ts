@@ -29,7 +29,7 @@ export const getAnimeList = async (): Promise<Anime[][]> => {
   const allAnime: Anime[] = [];
   const seenIds = new Set<number>();
 
-  for (let page = 1; page <= 8; page++) {
+  for (let page = 1; page <=5; page++) {
     const { data: anime } = await fetchWithRetry(page);
 
     anime.forEach((show) => {

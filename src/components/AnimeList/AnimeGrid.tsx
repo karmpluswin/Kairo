@@ -21,15 +21,17 @@ const AnimeGrid = ({
 }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [pinned, setPinned] = useState<Anime[]>([]);
-  const [pinnedLoaded, setPinnedLoaded] = useState(false);
+  const [pinnedLoaded, setPinnedLoaded] = useState(true);
   const { selectedGenre, searchQuery } = useAnimeFilter();
 
   useEffect(() => {
-    getAnimeByIdsClient(pinnedIds).then((data) => {
-      setPinned(data.filter(Boolean));
-      setPinnedLoaded(true);
-    });
-  }, [pinnedIds]);
+  if (pinnedIds.length === 0) return;
+
+  getAnimeByIdsClient(pinnedIds).then((data) => {
+    setPinned(data.filter(Boolean));
+    setPinnedLoaded(true);
+  });
+}, [pinnedIds]);
 
   const allAnime = useMemo(() => {
     const pinnedSet = new Set(pinnedIds);
