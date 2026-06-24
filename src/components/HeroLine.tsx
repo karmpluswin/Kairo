@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useTheme } from 'next-themes';
-import { LineShadowText } from '@/components/ui/line-shadow-text';
-import { AuroraText } from '@/components/ui/aurora-text';
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useTheme } from "next-themes";
+import { LineShadowText } from "@/components/ui/line-shadow-text";
+import { AuroraText } from "@/components/ui/aurora-text";
+import { useEffect, useState, useRef, useCallback } from "react";
 
 const MAX_SCALE = 1.5;
 const SPREAD = 80;
@@ -25,20 +25,22 @@ function LetterGroup({
   scales: number[];
 }) {
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'baseline' }}>
-      {text.split('').map((char, i) => {
+    <span style={{ display: "inline-flex", alignItems: "baseline" }}>
+      {text.split("").map((char, i) => {
         const globalIdx = refOffset + i;
         const scale = scales[globalIdx] ?? 1;
         return (
           <span
             key={i}
-            ref={(el) => { letterRefs.current[globalIdx] = el; }}
+            ref={(el) => {
+              letterRefs.current[globalIdx] = el;
+            }}
             style={{
-              display: 'inline-block',
+              display: "inline-block",
               transform: `scale(${scale.toFixed(3)})`,
-              transformOrigin: 'bottom center',
-              transition: 'transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1)',
-              willChange: 'transform',
+              transformOrigin: "bottom center",
+              transition: "transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              willChange: "transform",
             }}
           >
             {char}
@@ -52,9 +54,9 @@ function LetterGroup({
 // Plain words that get magnification: Your, Seasonal, Anime
 // Total animatable letters = 4 + 8 + 5 = 17
 const ANIMATED = [
-  { text: 'Your',     offset: 0  },
-  { text: 'Seasonal', offset: 4  },
-  { text: 'Anime',    offset: 12 },
+  { text: "Your", offset: 0 },
+  { text: "Seasonal", offset: 4 },
+  { text: "Anime", offset: 12 },
 ] as const;
 
 const TOTAL_LETTERS = 17; // Your(4) + Seasonal(8) + Anime(5)
@@ -63,12 +65,29 @@ export function HeroLine() {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-
   // const [mounted, setMounted] = useState(false);
   const [scales, setScales] = useState<number[]>(Array(TOTAL_LETTERS).fill(1));
-  const letterRefs = useRef<(HTMLSpanElement | null)[]>(Array(TOTAL_LETTERS).fill(null));
+  const letterRefs = useRef<(HTMLSpanElement | null)[]>(
+    Array(TOTAL_LETTERS).fill(null),
+  );
+  const [isMobile, setIsMobile] = useState(false);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     const mouseX = e.clientX;
@@ -90,29 +109,69 @@ export function HeroLine() {
     return null;
   }
 
-   const shadowColor = resolvedTheme === 'dark' ? 'white' : 'black';
+  const shadowColor = resolvedTheme === "dark" ? "white" : "black";
 
   return (
     <h2
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      className="text-center font-semibold leading-none text-3xl max-w-md xs:text-5xl xs:max-w-3xl lg:text-7xl w-full lg:max-w-5xl p-4 pt-0 my-4 cursor-default select-none"
-      style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'baseline', gap: '0.25em' }}
+      onMouseMove={!isMobile ? handleMouseMove : undefined}
+      onMouseLeave={!isMobile ? handleMouseLeave : undefined}
+      className="
+text-center
+font-semibold
+leading-[0.95]
+text-4xl
+sm:text-5xl
+md:text-6xl
+lg:text-7xl
+w-full
+max-w-[340px]
+sm:max-w-[700px]
+lg:max-w-5xl
+px-3
+pt-0
+my-4
+cursor-default
+select-none
+"
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        justifyContent: "center",
+        alignItems: "baseline",
+        gap: isMobile ? "0.12em" : "0.25em",
+      }}
     >
       {/* Your — magnified */}
-      <LetterGroup text="Your" letterRefs={letterRefs} refOffset={0} scales={scales} />
+      <LetterGroup
+        text="Your"
+        letterRefs={letterRefs}
+        refOffset={0}
+        scales={scales}
+      />
 
       {/* Favourite — static AuroraText, untouched */}
       <AuroraText>Favourite</AuroraText>
 
       {/* Seasonal — magnified */}
-      <LetterGroup text="Seasonal" letterRefs={letterRefs} refOffset={4} scales={scales} />
+      <LetterGroup
+        text="Seasonal"
+        letterRefs={letterRefs}
+        refOffset={4}
+        scales={scales}
+      />
 
       {/* Anime — magnified */}
-      <LetterGroup text="Anime" letterRefs={letterRefs} refOffset={12} scales={scales} />
+      <LetterGroup
+        text="Anime"
+        letterRefs={letterRefs}
+        refOffset={12}
+        scales={scales}
+      />
 
       {/* Tracker — static LineShadowText, untouched */}
-      <LineShadowText className="italic" shadowColor={shadowColor}>Tracker</LineShadowText>
+      <LineShadowText className="italic" shadowColor={shadowColor}>
+        Tracker
+      </LineShadowText>
     </h2>
   );
 }
