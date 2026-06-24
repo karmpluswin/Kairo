@@ -28,6 +28,7 @@ export const POPULAR_PINNED_MAL_IDS = [
   52034,  // Oshi no Ko
   57334,  // Dandadan
   47917,  // Bocchi the Rock
+  52299,  // Solo Leveling
   // 48583,  // Spy x Family
   // 50739,  // Hell's Paradise
   // 51009,  // Vinland Saga Season 2
