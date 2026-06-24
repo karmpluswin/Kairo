@@ -2,8 +2,7 @@ import Header from '@/components/Header/Header';
 import AnimeList from '@/components/AnimeList/AnimeList';
 import { HeroLine } from '@/components/HeroLine';
 
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-cache';
+export const revalidate = 3600;
 
 export default function Home() {
   return (
