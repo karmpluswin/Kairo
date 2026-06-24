@@ -10,7 +10,7 @@ const fetchWithRetry = async (
   retries = 5
 ): Promise<AnimeResponse> => {
   const url = `${JIKAN_BASE}/seasons/now?page=${page}&limit=25&sfw=true`;
-  const res = await fetch(url, { next: { revalidate: 3600 } });
+  const res = await fetch(url);
 
   if (res.status === 429) {
     if (retries > 0) {
@@ -67,7 +67,7 @@ const fetchTopWithRetry = async (
   retries = 3
 ): Promise<AnimeResponse> => {
   const url = `${JIKAN_BASE}/top/anime?page=${page}&limit=10&filter=bypopularity&sfw=true`;
-  const res = await fetch(url, { next: { revalidate: 3600 } });
+  const res = await fetch(url);
 
   if (res.status === 429) {
     if (retries > 0) {
@@ -108,7 +108,7 @@ const fetchAnimeByIdWithRetry = async (
   retries = 3
 ): Promise<Anime | null> => {
   const url = `${JIKAN_BASE}/anime/${id}`;
-  const res = await fetch(url, { next: { revalidate: 3600 } });
+  const res = await fetch(url);
 
   if (res.status === 429) {
     if (retries > 0) {
