@@ -26,12 +26,24 @@ const fetchWithRetry = async (page: number, retries = 3): Promise<AnimeResponse>
 };
 
 export const getAnimeList = async (): Promise<Anime[][]> => {
-  const { data } = await fetchWithRetry(1);
+  const allAnime: Anime[] = [];
+  const seenIds = new Set<number>();
+
+  for (let page = 1; page <= 5; page++) {
+    const { data: anime } = await fetchWithRetry(page);
+
+    anime.forEach((show) => {
+      if (!seenIds.has(show.mal_id)) {
+        allAnime.push(show);
+        seenIds.add(show.mal_id);
+      }
+    });
+  }
 
   const chunked: Anime[][] = [];
 
-  for (let i = 0; i < data.length; i += 24) {
-    chunked.push(data.slice(i, i + 24));
+  for (let i = 0; i < allAnime.length; i += 24) {
+    chunked.push(allAnime.slice(i, i + 24));
   }
 
   return chunked;

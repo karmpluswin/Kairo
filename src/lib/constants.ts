@@ -28,14 +28,13 @@ export const POPULAR_PINNED_MAL_IDS = [
   52034,  // Oshi no Ko
   57334,  // Dandadan
   47917,  // Bocchi the Rock
-  49458,  // Blue Lock
+  49596,  // Blue Lock
   48583,  // Spy x Family
   50739,  // Hell's Paradise
   51009,  // Vinland Saga Season 2
   39535,  // Mushoku Tensei
-  40028,  // Kimetsu no Yaiba Movie: Mugen Ressha-hen
   35849,  // Violet Evergarden
+  9253,   // Steins;Gate
   32281,  // Kimi no Na wa (Your Name)
   28851,  // Koe no Katachi (A Silent Voice)
-  9253,   // Steins;Gate
 ] as const;
