@@ -1,7 +1,7 @@
 'use client';
 
 import { FC, useEffect, useState } from 'react';
-import { Calendar } from 'lucide-react';
+import { Calendar, CalendarCheck, CalendarClock } from 'lucide-react';
 import { AnimeStatus, TimeUnits } from '@/types/anime';
 import { TIME_UNITS } from '@/lib/constants';
 import { calculateTimeRemaining, getNextBroadcastDate } from '@/lib/datetime';
@@ -42,18 +42,20 @@ const Countdown: FC<CountdownProps> = ({
 
   if (status === AnimeStatus.FINISHED_AIRING) {
     return (
-      <div className="flex items-center gap-1">
-        <Calendar className="mr-1 h-4 w-4" />
-        <span>Finished Airing</span>
+      <div className="flex items-center gap-1 min-w-0">
+        <CalendarCheck className="mr-1 h-4 w-4 shrink-0 text-green-500" />
+        <span className="truncate">
+          {airedString ? airedString.replace(' to ', ' – ') : 'Finished Airing'}
+        </span>
       </div>
     );
   }
 
   if (type === 'TV' && status === AnimeStatus.NOT_YET_AIRED) {
     return (
-      <div className="flex items-center gap-1">
-        <Calendar className="mr-1 h-4 w-4" />
-        <span>Not Yet Aired</span>
+      <div className="flex items-center gap-1 min-w-0">
+        <CalendarClock className="mr-1 h-4 w-4 shrink-0 text-blue-400" />
+        <span className="truncate">{airedString ?? 'Not Yet Aired'}</span>
       </div>
     );
   }
