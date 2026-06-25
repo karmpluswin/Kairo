@@ -24,6 +24,7 @@ export const POPULAR_PINNED_MAL_IDS = [
   34572,  // Black Clover
   49596,  // Tomodachi Game
   11757,  // Sword Art Online
+  39535,  // Mushoku Tensei
   50273,  // Sousou no Frieren
   52034,  // Oshi no Ko
   57334,  // Dandadan
@@ -34,7 +35,6 @@ export const POPULAR_PINNED_MAL_IDS = [
   // 48583,  // Spy x Family
   // 50739,  // Hell's Paradise
   // 51009,  // Vinland Saga Season 2
-  // 39535,  // Mushoku Tensei
   // 35849,  // Violet Evergarden
   // 9253,   // Steins;Gate
   // 32281,  // Kimi no Na wa (Your Name)

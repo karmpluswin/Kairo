@@ -5,6 +5,8 @@ import { sukajan } from "@/lib/fonts";
 import ThemeProvider from '@/components/Providers/ThemeProvider';
 import { AnimeFilterProvider } from '@/components/Providers/AnimeFilterContext';
 import Footer from '@/components/Footer/Footer';
+import PageLoader from '@/components/PageLoader';
+import PageTransition from '@/components/PageTransition';
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -22,12 +24,16 @@ export default function RootLayout({
       <body className={`${poppins.className} ${minecraft.variable} ${sukajan.variable} antialiased min-h-full flex flex-col`}>
         <ThemeProvider>
           <AnimeFilterProvider>
-            <div>
-              {children}
-            </div>
-            <div className="hidden lg:block">
-              <Footer />
-            </div>
+            {/* Loader sits on top of everything */}
+            <PageLoader />
+            <PageTransition>
+              <div>
+                {children}
+              </div>
+              <div className="hidden lg:block">
+                <Footer />
+              </div>
+            </PageTransition>
           </AnimeFilterProvider>
         </ThemeProvider>
       </body>
