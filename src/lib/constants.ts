@@ -33,8 +33,8 @@ export const POPULAR_PINNED_MAL_IDS = [
   // 11757, // Sword Art Online
     52034, // Oshi no Ko
   39535, // Mushoku Tensei
-  // 49596,  // Tomodachi Game
-  50273, // Sousou no Frieren
+  // 50273,  // Tomodachi Game
+ 52991, // Sousou no Frieren
   57334, // Dandada
   // 47917,  // Bocchi the Rock
   // 52299,  // Solo Leveling
@@ -43,12 +43,12 @@ export const POPULAR_PINNED_MAL_IDS = [
   // 48583,  // Spy x Family
   50739,  // Hell's Paradise
   // 51009,  // Vinland Saga Season 2
-  9253,   // Steins;Gate
+  // 9253,   // Steins;Gate
   // 32281,  // Kimi no Na wa (Your Name)
-  28851,  // Koe no Katachi (A Silent Voice)
-  37520,  // Dororo
-  40834, // Ousama Ranking
-  53393, // Tengoku Daimakyou
-  50709, // Lycoris Recoil
-  32995, // Yuri on Ice
+  28851,  // Koe no Katachi (A Silent Voice) -
+  // 37520,  // Dororo -
+  // 40834, // Ousama Ranking -
+  // 53393, // Tengoku Daimakyou -
+  // 50709, // Lycoris Recoil -
+  // 32995, // Yuri on Ice -
 ] as const;
