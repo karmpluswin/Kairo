@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Anime } from "@/types/anime";
 import AnimeCard from "./AnimeCard";
 import { useAnimeFilter } from "@/components/Providers/AnimeFilterContext";
-import { getAnimeByIdsClient } from "@/lib/anime";
 import {
   Pagination, PaginationContent, PaginationItem,
   PaginationLink, PaginationNext, PaginationPrevious,
@@ -15,27 +14,24 @@ const ITEMS_PER_PAGE = 24;
 const AnimeGrid = ({
   initialAnimePages,
   pinnedIds,
+  initialPinned,
 }: {
   initialAnimePages: Anime[];
   pinnedIds: readonly number[];
+  initialPinned: Anime[]; // server-fetched, always complete
 }) => {
   const [currentPage, setCurrentPage] = useState(0);
-  const [pinned, setPinned] = useState<Anime[]>([]);
   const { selectedGenre, searchQuery } = useAnimeFilter();
-
-  useEffect(() => {
-  if (pinnedIds.length === 0) return;
-
-  getAnimeByIdsClient(pinnedIds).then((data) => {
-    setPinned(data.filter(Boolean));
-  });
-}, [pinnedIds]);
 
   const allAnime = useMemo(() => {
     const pinnedSet = new Set(pinnedIds);
+    // Sort pinned to match the original order in POPULAR_PINNED_MAL_IDS
+    const sortedPinned = [...initialPinned].sort(
+      (a, b) => pinnedIds.indexOf(a.mal_id) - pinnedIds.indexOf(b.mal_id)
+    );
     const seasonal = initialAnimePages.filter((a) => a && !pinnedSet.has(a.mal_id));
-    return [...pinned, ...seasonal];
-  }, [pinned, initialAnimePages, pinnedIds]);
+    return [...sortedPinned, ...seasonal];
+  }, [initialPinned, initialAnimePages, pinnedIds]);
 
   const filtered = useMemo(() => {
     let list = allAnime;
@@ -45,7 +41,8 @@ const AnimeGrid = ({
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       list = list.filter(
-        (a) => a.title.toLowerCase().includes(q) ||
+        (a) =>
+          a.title.toLowerCase().includes(q) ||
           (a.title_english ?? "").toLowerCase().includes(q)
       );
     }
@@ -70,7 +67,7 @@ const AnimeGrid = ({
         <p className="text-sm text-muted-foreground">
           Showing <span className="text-foreground font-medium">{filtered.length}</span> results
           {selectedGenre !== "All" && <> for <span className="text-green-500 font-medium">{selectedGenre}</span></>}
-          {searchQuery && <> matching <span className="text-green-500 font-medium">"{searchQuery}"</span></>}
+          {searchQuery && <> matching <span className="text-green-500 font-medium">&quot;{searchQuery}&quot;</span></>}
         </p>
       )}
 

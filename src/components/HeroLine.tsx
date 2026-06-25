@@ -85,10 +85,6 @@ export function HeroLine() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     const mouseX = e.clientX;
     const newScales = letterRefs.current.map((el) => {
@@ -118,28 +114,30 @@ export function HeroLine() {
       className="
 text-center
 font-semibold
-leading-[0.95]
-text-4xl
+leading-[1]
+text-[1.5rem]
+min-[400px]:text-[2.0rem]
 sm:text-5xl
 md:text-6xl
 lg:text-7xl
 w-full
-max-w-[340px]
+max-w-[360px]
+min-[400px]:max-w-[500px]
 sm:max-w-[700px]
 lg:max-w-5xl
-px-3
-pt-0
+px-4
 my-4
 cursor-default
 select-none
 "
       style={{
-        display: "flex",
-        flexWrap: "wrap",
-        justifyContent: "center",
-        alignItems: "baseline",
-        gap: isMobile ? "0.12em" : "0.25em",
-      }}
+  display: "flex",
+  flexWrap: "wrap",
+  justifyContent: "center",
+  alignItems: "baseline",
+  columnGap: "0.22em", // space between words
+  rowGap: "0.02em",    // space between wrapped lines
+}}
     >
       {/* Your — magnified */}
       <LetterGroup

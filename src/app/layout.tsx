@@ -30,7 +30,7 @@ export default function RootLayout({
               <div>
                 {children}
               </div>
-              <div className="hidden lg:block">
+              <div>
                 <Footer />
               </div>
             </PageTransition>
