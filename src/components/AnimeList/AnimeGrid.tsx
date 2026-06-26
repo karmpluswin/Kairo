@@ -48,7 +48,7 @@ const AnimeGrid = ({
           mal_id: a.mal_id,
           title: a.title,
           title_english: a.title_english ?? null,
-          score: a.score,
+          score: a.score ?? undefined,
         }))
       );
     }
