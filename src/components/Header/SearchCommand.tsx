@@ -20,11 +20,16 @@ interface SearchAnime {
   score?: number;
 }
 
+// Shared anime list store — AnimeGrid writes here, SearchCommand reads it
+let _animeListCache: SearchAnime[] = [];
+export function setAnimeListCache(list: SearchAnime[]) {
+  _animeListCache = list;
+}
+
 export function SearchCommand() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchAnime[]>([]);
-  const [defaultResults, setDefaultResults] = useState<SearchAnime[]>([]);
+  const [localResults, setLocalResults] = useState<SearchAnime[]>([]);
   const { searchQuery, setSearchQuery } = useAnimeFilter();
 
   // Ctrl+K shortcut
@@ -39,103 +44,57 @@ export function SearchCommand() {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  // Fetch a default "all-time most popular" list once, on first open
+  // Search against the loaded anime list instantly (no API call needed)
   useEffect(() => {
-    if (!open || defaultResults.length > 0) return;
-    (async () => {
-      try {
-        const res = await fetch(
-          `https://api.jikan.moe/v4/top/anime?limit=6&filter=bypopularity&sfw=true`,
-        );
-        const data = await res.json();
-        const list: SearchAnime[] = data.data ?? [];
-        const seen = new Set<number>();
-        const deduped = list.filter((anime) => {
-          if (seen.has(anime.mal_id)) return false;
-          seen.add(anime.mal_id);
-          return true;
-        });
-        setDefaultResults(deduped);
-      } catch (err) {
-        console.error(err);
-      }
-    })();
-  }, [open, defaultResults.length]);
+    const q = query.trim().toLowerCase();
+    if (!q) {
+      setLocalResults(_animeListCache.slice(0, 6));
+      return;
+    }
+    const filtered = _animeListCache.filter((a) =>
+      (a.title_english ?? a.title).toLowerCase().includes(q) ||
+      a.title.toLowerCase().includes(q)
+    );
+    setLocalResults(filtered.slice(0, 6));
+  }, [query, open]);
 
-  // Fetch results as user types
+  // Refresh default results when dialog opens
   useEffect(() => {
-    const timer = setTimeout(async () => {
-      if (!query.trim()) {
-        setResults([]);
-        return;
-      }
-      try {
-        const res = await fetch(
-          `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=6&sfw=true`,
-        );
-        const data = await res.json();
-        const list: SearchAnime[] = data.data ?? [];
-        const seen = new Set<number>();
-        const deduped = list.filter((anime) => {
-          if (seen.has(anime.mal_id)) return false;
-          seen.add(anime.mal_id);
-          return true;
-        });
-        setResults(deduped);
-      } catch (err) {
-        console.error(err);
-      }
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [query]);
-
-  const shownResults = query.trim() ? results : defaultResults;
-  const listHeading = query.trim() ? "Anime" : "Most Popular";
+    if (open) {
+      setLocalResults(_animeListCache.slice(0, 6));
+    }
+  }, [open]);
 
   const handleSelect = (anime: SearchAnime) => {
     setSearchQuery(anime.title_english ?? anime.title);
     setOpen(false);
     setQuery("");
-    setResults([]);
   };
 
   const handleOpenChange = (val: boolean) => {
     setOpen(val);
-    if (!val) {
-      setQuery("");
-      setResults([]);
-    }
+    if (!val) setQuery("");
   };
 
-  const clearSearch = () => {
-    setSearchQuery("");
-  };
+  const clearSearch = () => setSearchQuery("");
+
+  const listHeading = query.trim() ? `Results (${localResults.length})` : "All Anime";
 
   return (
     <>
-      {/* Desktop trigger — shows active search query as label */}
+      {/* Desktop trigger */}
       <button
         onClick={() => setOpen(true)}
         className="hidden md:flex items-center gap-2 px-3 h-10 w-44 lg:w-80 rounded-xl border border-border bg-muted/50 hover:bg-muted/100 text-sm transition-colors"
       >
         <Search className="w-4 h-4 text-green-500 shrink-0" />
-        <span
-          className={
-            searchQuery
-              ? "text-foreground truncate flex-1 text-left"
-              : "text-muted-foreground flex-1 text-left"
-          }
-        >
+        <span className={searchQuery ? "text-foreground truncate flex-1 text-left" : "text-muted-foreground flex-1 text-left"}>
           {searchQuery || "Search Anime"}
         </span>
-        {/* X button to clear search without opening dialog */}
         {searchQuery && (
           <span
             role="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              clearSearch();
-            }}
+            onClick={(e) => { e.stopPropagation(); clearSearch(); }}
             className="p-0.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground"
           >
             <X className="w-3.5 h-3.5" />
@@ -151,41 +110,29 @@ export function SearchCommand() {
       <CommandDialog open={open} onOpenChange={handleOpenChange}>
         <Command shouldFilter={false}>
           <CommandInput
-            placeholder="Search seasonal anime..."
+            placeholder="Search anime..."
             value={query}
             onValueChange={setQuery}
           />
           <CommandList className="max-h-80 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            <CommandEmpty>
-              {query.trim() ? "No anime found." : "Start typing to search..."}
-            </CommandEmpty>
+            <CommandEmpty>No anime found.</CommandEmpty>
 
-            {shownResults.length > 0 && (
+            {localResults.length > 0 && (
               <CommandGroup
                 heading={listHeading}
                 className="[&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider"
               >
-                {shownResults.slice(0, 6).map((anime) => (
+                {localResults.map((anime) => (
                   <CommandItem
                     key={anime.mal_id}
                     value={String(anime.mal_id)}
                     onSelect={() => handleSelect(anime)}
-                    className="
-            mx-2 my-1
-            rounded-lg
-            px-4 py-3
-            cursor-pointer
-            border border-transparent
-            hover:bg-muted
-            hover:border-border
-            transition-all
-          "
+                    className="mx-2 my-1 rounded-lg px-4 py-3 cursor-pointer border border-transparent hover:bg-muted hover:border-border transition-all"
                   >
                     <div className="flex items-center justify-between w-full gap-4 min-w-0">
                       <span className="truncate flex-1 font-medium text-sm">
                         {anime.title_english ?? anime.title}
                       </span>
-
                       {anime.score && (
                         <div className="flex items-center gap-1 whitespace-nowrap shrink-0">
                           <Star className="h-4 w-4 text-yellow-400 fill-yellow-400 flex-shrink-0" />

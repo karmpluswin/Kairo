@@ -20,10 +20,8 @@ export function FluidGradientText({
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 640);
     };
-
     checkMobile();
     window.addEventListener("resize", checkMobile);
-
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
@@ -36,16 +34,11 @@ export function FluidGradientText({
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     if (isMobile) return;
-
     const container = event.currentTarget;
     const rect = container.getBoundingClientRect();
-
     const mouseX = event.clientX - rect.left;
     const normalizedX = (mouseX / rect.width) * svgViewBoxWidth;
-
-    gradientX1Raw.set(
-      Math.max(0, Math.min(svgViewBoxWidth, normalizedX))
-    );
+    gradientX1Raw.set(Math.max(0, Math.min(svgViewBoxWidth, normalizedX)));
   };
 
   const handleMouseLeave = () => {
@@ -72,10 +65,12 @@ export function FluidGradientText({
           y="50%"
           textAnchor="middle"
           dominantBaseline="central"
-          stroke={isMobile ? "white" : "currentColor"}
+          stroke="currentColor"
           strokeOpacity={isMobile ? "0" : "0.1"}
           strokeWidth="2"
-          fill={isMobile ? "white" : "url(#fluid_gradient_text_linear)"}
+          // On mobile use currentColor (respects dark/light mode),
+          // on desktop use the gradient
+          fill={isMobile ? "currentColor" : "url(#fluid_gradient_text_linear)"}
           style={{
             fontFamily: "Minecraft",
             fontSize: svgViewBoxHeight,
@@ -94,11 +89,7 @@ export function FluidGradientText({
               y2={svgViewBoxHeight}
               gradientUnits="userSpaceOnUse"
             >
-              <stop
-                offset="0.625"
-                stopColor="currentColor"
-                stopOpacity="0"
-              />
+              <stop offset="0.625" stopColor="currentColor" stopOpacity="0" />
               <stop offset="1" stopColor="currentColor" />
             </motion.linearGradient>
           </defs>

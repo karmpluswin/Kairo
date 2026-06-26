@@ -32,7 +32,7 @@ export const POPULAR_PINNED_MAL_IDS = [
   // 19703,
   // 11757, // Sword Art Online
     52034, // Oshi no Ko
-  39535, // Mushoku Tensei
+  // 39535, // Mushoku Tensei
   // 50273,  // Tomodachi Game
  52991, // Sousou no Frieren
   57334, // Dandada

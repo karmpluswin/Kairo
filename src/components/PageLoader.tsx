@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AppleHelloEffectJapanese } from './AppleHelloEffectJapanese';
+import { triggerPageReveal } from './PageTransition';
 
 export default function PageLoader() {
   const [done, setDone] = useState(false);
@@ -10,13 +11,14 @@ export default function PageLoader() {
   // Lock scroll while loader is visible
   useEffect(() => {
     document.documentElement.style.overflow = 'hidden';
-    return () => {
-      document.documentElement.style.overflow = '';
-    };
+    return () => { document.documentElement.style.overflow = ''; };
   }, []);
 
   const handleDone = () => {
     document.documentElement.style.overflow = '';
+    // Tell PageTransition to start revealing NOW
+    triggerPageReveal();
+    // Then fade out loader
     setDone(true);
   };
 
@@ -29,20 +31,10 @@ export default function PageLoader() {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, transition: { duration: 0.6, ease: 'easeInOut' } }}
         >
-          {/* <p
-            className="text-xs tracking-[0.5em] uppercase text-primary select-none"
-            style={{ fontFamily: 'var(--font-minecraft), monospace' }}
-          >
-            Kairo
-          </p> */}
 
           <div className="w-[min(580px,80vw)] text-primary">
             <AppleHelloEffectJapanese onAnimationComplete={handleDone} />
           </div>
-
-          {/* <p className="text-xs text-primary/50 tracking-widest uppercase animate-pulse">
-            Your Seasonal Anime Tracker
-          </p> */}
         </motion.div>
       )}
     </AnimatePresence>

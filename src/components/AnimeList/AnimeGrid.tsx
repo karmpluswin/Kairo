@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Anime } from "@/types/anime";
 import AnimeCard from "./AnimeCard";
 import { useAnimeFilter } from "@/components/Providers/AnimeFilterContext";
+import { getAnimeByIdsClient } from "@/lib/anime";
+import { setAnimeListCache } from "@/components/Header/SearchCommand";
 import {
   Pagination, PaginationContent, PaginationItem,
   PaginationLink, PaginationNext, PaginationPrevious,
@@ -14,24 +16,43 @@ const ITEMS_PER_PAGE = 24;
 const AnimeGrid = ({
   initialAnimePages,
   pinnedIds,
-  initialPinned,
 }: {
   initialAnimePages: Anime[];
   pinnedIds: readonly number[];
-  initialPinned: Anime[]; // server-fetched, always complete
 }) => {
   const [currentPage, setCurrentPage] = useState(0);
+  const [pinned, setPinned] = useState<Anime[]>([]);
   const { selectedGenre, searchQuery } = useAnimeFilter();
+
+  useEffect(() => {
+    if (pinnedIds.length === 0) return;
+    getAnimeByIdsClient(pinnedIds).then((data) => {
+      setPinned(data.filter(Boolean));
+    });
+  }, [pinnedIds]);
 
   const allAnime = useMemo(() => {
     const pinnedSet = new Set(pinnedIds);
-    // Sort pinned to match the original order in POPULAR_PINNED_MAL_IDS
-    const sortedPinned = [...initialPinned].sort(
+    const sortedPinned = [...pinned].sort(
       (a, b) => pinnedIds.indexOf(a.mal_id) - pinnedIds.indexOf(b.mal_id)
     );
     const seasonal = initialAnimePages.filter((a) => a && !pinnedSet.has(a.mal_id));
     return [...sortedPinned, ...seasonal];
-  }, [initialPinned, initialAnimePages, pinnedIds]);
+  }, [pinned, initialAnimePages, pinnedIds]);
+
+  // Write full list to search cache whenever allAnime updates
+  useEffect(() => {
+    if (allAnime.length > 0) {
+      setAnimeListCache(
+        allAnime.map((a) => ({
+          mal_id: a.mal_id,
+          title: a.title,
+          title_english: a.title_english ?? null,
+          score: a.score,
+        }))
+      );
+    }
+  }, [allAnime]);
 
   const filtered = useMemo(() => {
     let list = allAnime;
