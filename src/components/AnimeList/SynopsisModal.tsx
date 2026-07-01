@@ -40,15 +40,20 @@ export function SynopsisModal({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className={cn('w-full', className)}>
-          <Book className="h-3 w-3" /> Read Synopsis
+        <Button
+          variant="outline"
+          size="sm"
+          className={cn('w-full min-w-0 px-2 text-xs sm:text-sm', className)}
+        >
+          <Book className="h-3 w-3 shrink-0" />
+          <span className="truncate">Read Synopsis</span>
         </Button>
       </DialogTrigger>
 
       <DialogContent className="overflow-hidden p-0 sm:max-w-2xl">
-        <div className="flex flex-col sm:flex-row">
+        <div className="flex flex-col sm:min-h-[420px] sm:flex-row">
           {/* Poster — left panel, hidden on mobile (details/synopsis only) */}
-          <div className="relative hidden w-full shrink-0 sm:block sm:w-[280px] sm:self-stretch">
+          <div className="relative hidden w-full shrink-0 bg-black sm:block sm:h-[420px] sm:w-[280px]">
             <Image
               src={image}
               alt={title}

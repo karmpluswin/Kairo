@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Star, Building2 } from "lucide-react";
 import { SynopsisModal } from "./SynopsisModal";
+import { TrailerModal } from "./TrailerModal";
 import { Anime, AnimeStatus } from "@/types/anime";
 import Image from "next/image";
 import WatchingStatusControl from "./WatchingStatusControl";
@@ -23,7 +24,11 @@ export default function AnimeCard({
   synopsis,
 }: Readonly<Anime>) {
   const image = images.webp.large_image_url ?? images.jpg.large_image_url;
-  const trailerUrl = trailer?.url ?? "#";
+  const trailerUrl =
+    trailer?.embed_url ??
+    (trailer?.youtube_id
+      ? `https://www.youtube.com/embed/${trailer.youtube_id}`
+      : null);
   const joinedStudios = studios?.map((s) => s.name).join(", ") ?? "N/A";
   const showWatchingControl = status !== AnimeStatus.NOT_YET_AIRED && totalEpisodes;
 
@@ -55,16 +60,26 @@ export default function AnimeCard({
       <WatchingStatusControl title={title} totalEpisodes={totalEpisodes} />
     ) : null}
 
-    <SynopsisModal
-      title={title_english ?? title}
-      synopsis={synopsis}
-      image={image}
-      type={type}
-      score={score}
-      scoredBy={scoredBy}
-      studios={joinedStudios}
-      genres={genres}
-    />
+    <div className="flex flex-col gap-2">
+      <SynopsisModal
+        title={title_english ?? title}
+        synopsis={synopsis}
+        image={image}
+        type={type}
+        score={score}
+        scoredBy={scoredBy}
+        studios={joinedStudios}
+        genres={genres}
+      />
+      <TrailerModal
+        title={title_english ?? title}
+        trailerUrl={trailerUrl}
+        type={type}
+        score={score}
+        scoredBy={scoredBy}
+        genres={genres}
+      />
+    </div>
   </div>
 </div>
 
@@ -120,16 +135,26 @@ export default function AnimeCard({
             {showWatchingControl ? (
               <WatchingStatusControl title={title} totalEpisodes={totalEpisodes} />
             ) : null}
-            <SynopsisModal
-              title={title_english ?? title}
-              synopsis={synopsis}
-              image={image}
-              type={type}
-              score={score}
-              scoredBy={scoredBy}
-              studios={joinedStudios}
-              genres={genres}
-            />
+            <div className="grid grid-cols-2 gap-2">
+              <TrailerModal
+                title={title_english ?? title}
+                trailerUrl={trailerUrl}
+                type={type}
+                score={score}
+                scoredBy={scoredBy}
+                genres={genres}
+              />
+              <SynopsisModal
+                title={title_english ?? title}
+                synopsis={synopsis}
+                image={image}
+                type={type}
+                score={score}
+                scoredBy={scoredBy}
+                studios={joinedStudios}
+                genres={genres}
+              />
+            </div>
           </div>
         </div>
       </div>
