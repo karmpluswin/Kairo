@@ -42,9 +42,17 @@ const AnimeGrid = ({
 
   useEffect(() => {
     if (pinnedIds.length === 0) return;
-    getAnimeByIdsClient(pinnedIds).then((data) => {
-      setPinned(data.filter(Boolean));
+    let cancelled = false;
+    getAnimeByIdsClient(pinnedIds, (anime) => {
+      if (cancelled) return;
+      // show each pinned anime as soon as it arrives (dedupe for StrictMode)
+      setPinned((prev) =>
+        prev.some((p) => p.mal_id === anime.mal_id) ? prev : [...prev, anime],
+      );
     });
+    return () => {
+      cancelled = true;
+    };
   }, [pinnedIds]);
 
   const allAnime = useMemo(() => {
