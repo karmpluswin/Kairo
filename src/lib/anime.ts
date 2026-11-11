@@ -1,46 +1,38 @@
 import { Anime, AnimeResponse } from "@/types/anime";
 
 const JIKAN_BASE = "https://api.jikan.moe/v4";
+const REQUEST_TIMEOUT_MS = 8000;
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-const fetchWithRetry = async (
-  page: number,
+// Resilient Jikan fetch: timeout + retry with backoff on network errors,
+// 429 and 5xx. Throws only after all retries are exhausted.
+const fetchJikan = async <T,>(
+  path: string,
+  revalidate: number,
   retries = 3,
-): Promise<AnimeResponse> => {
-  const res = await fetch(
-    `${JIKAN_BASE}/seasons/now?page=${page}&limit=25&sfw=true`,
-    {
-      next: {
-        revalidate: 3600,
-      },
-    },
-  );
+): Promise<T> => {
+  let lastError: unknown;
 
-  if (res.status === 429) {
-    if (retries > 0) {
-      await delay(1000);
-      return fetchWithRetry(page, retries - 1);
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(`${JIKAN_BASE}${path}`, {
+        next: { revalidate },
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      });
+
+      if (res.ok) return (await res.json()) as T;
+
+      lastError = new Error(`Jikan API error: ${res.status}`);
+      // Don't retry client errors other than rate limiting
+      if (res.status !== 429 && res.status < 500) break;
+    } catch (err) {
+      lastError = err; // timeout / network failure
     }
 
-    console.error(`Rate limited on page ${page}`);
-
-    return {
-      data: [],
-      pagination: {
-        last_visible_page: page,
-        has_next_page: false,
-        current_page: page,
-        items: {
-          count: 0,
-          total: 0,
-          per_page: 25,
-        },
-      },
-    };
+    if (attempt < retries) await delay(1000 * (attempt + 1));
   }
 
-  if (!res.ok) throw new Error(`Jikan API error: ${res.status}`);
-  return res.json();
+  throw lastError instanceof Error ? lastError : new Error("Jikan request failed");
 };
 
 export const getAnimeList = async (): Promise<Anime[][]> => {
@@ -48,24 +40,36 @@ export const getAnimeList = async (): Promise<Anime[][]> => {
   const seenIds = new Set<number>();
 
   for (let page = 1; page <= 4; page++) {
-    const { data: anime } = await fetchWithRetry(page);
+    try {
+      const { data: anime } = await fetchJikan<AnimeResponse>(
+        `/seasons/now?page=${page}&limit=25&sfw=true`,
+        3600,
+      );
 
-    anime.forEach((show) => {
-      if (!seenIds.has(show.mal_id)) {
-        allAnime.push(show);
-        seenIds.add(show.mal_id);
-      }
-    });
+      anime.forEach((show) => {
+        if (!seenIds.has(show.mal_id)) {
+          allAnime.push(show);
+          seenIds.add(show.mal_id);
+        }
+      });
+    } catch (err) {
+      // Skip a failed page instead of crashing the whole render
+      console.error(`Failed to load seasonal page ${page}:`, err);
+    }
 
     await delay(300);
   }
 
-  const chunked: Anime[][] = [];
+  // Nothing at all -> throw, so ISR keeps serving the last good page
+  // instead of caching an empty one.
+  if (allAnime.length === 0) {
+    throw new Error("Jikan unavailable: no seasonal anime loaded");
+  }
 
+  const chunked: Anime[][] = [];
   for (let i = 0; i < allAnime.length; i += 24) {
     chunked.push(allAnime.slice(i, i + 24));
   }
-
   return chunked;
 };
 
