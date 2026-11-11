@@ -2,7 +2,8 @@ import Header from '@/components/Header/Header';
 import AnimeList from '@/components/AnimeList/AnimeList';
 import { HeroLine } from '@/components/HeroLine';
 
-export const dynamic = 'force-dynamic';
+// ISR: page is prebuilt and regenerated in the background every hour.
+// If regeneration fails (e.g. Jikan down), Vercel keeps serving the last good page.
 export const revalidate = 3600;
 
 export default function Home() {
