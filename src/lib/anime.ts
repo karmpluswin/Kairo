@@ -1,87 +1,95 @@
 import { Anime, AnimeResponse } from "@/types/anime";
 
-const JIKAN_BASE = "https://api.jikan.moe/v4";
-const REQUEST_TIMEOUT_MS = 5000;
+// api.jikan.moe has become unreliable (connect timeouts / 504s).
+// Tenrai is a Jikan v4-compatible mirror, so we try it first and
+// fall back to Jikan. Same paths and JSON shape on both.
+const API_BASES = [
+  "https://api.tenrai.org/v1",
+  "https://api.jikan.moe/v4",
+] as const;
+
+const SERVER_TIMEOUT_MS = 4000;
+const CLIENT_TIMEOUT_MS = 6000;
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-// Resilient Jikan fetch: timeout + retry with backoff on network errors,
-// 429 and 5xx. Throws only after all retries are exhausted.
-const fetchJikan = async <T,>(
+// Try each API base in order. Moves on after a timeout, network error,
+// 429 or 5xx. Throws only if every base fails.
+async function requestApi<T>(
   path: string,
-  revalidate: number,
-  retries = 1,
-): Promise<T> => {
+  init: RequestInit & { next?: { revalidate: number } },
+  timeoutMs: number,
+): Promise<T> {
   let lastError: unknown;
 
-  for (let attempt = 0; attempt <= retries; attempt++) {
+  for (const base of API_BASES) {
     try {
-      const res = await fetch(`${JIKAN_BASE}${path}`, {
-        next: { revalidate },
-        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      const res = await fetch(`${base}${path}`, {
+        ...init,
+        signal: AbortSignal.timeout(timeoutMs),
       });
-
       if (res.ok) return (await res.json()) as T;
 
-      lastError = new Error(`Jikan API error: ${res.status}`);
-      // Don't retry client errors other than rate limiting
-      if (res.status !== 429 && res.status < 500) break;
+      lastError = new Error(`API error ${res.status} from ${base}`);
+      if (res.status === 429) await delay(800); // brief pause, then next base
     } catch (err) {
-      lastError = err; // timeout / network failure
+      lastError = err;
     }
-
-    if (attempt < retries) await delay(1000 * (attempt + 1));
   }
 
-  throw lastError instanceof Error ? lastError : new Error("Jikan request failed");
+  throw lastError instanceof Error ? lastError : new Error("All anime APIs failed");
+}
+
+const fetchServer = <T,>(path: string, revalidate: number) =>
+  requestApi<T>(path, { next: { revalidate } }, SERVER_TIMEOUT_MS);
+
+const fetchClient = <T,>(path: string) =>
+  requestApi<T>(path, {}, CLIENT_TIMEOUT_MS);
+
+const chunk24 = (list: Anime[]): Anime[][] => {
+  const out: Anime[][] = [];
+  for (let i = 0; i < list.length; i += 24) out.push(list.slice(i, i + 24));
+  return out;
 };
 
+// Server: seasonal list. Bails on the first failed page (don't make the
+// visitor wait) and returns what it has; the browser fills in if empty.
 export const getAnimeList = async (): Promise<Anime[][]> => {
   const allAnime: Anime[] = [];
   const seenIds = new Set<number>();
 
   for (let page = 1; page <= 4; page++) {
     try {
-      const { data: anime } = await fetchJikan<AnimeResponse>(
+      const { data } = await fetchServer<AnimeResponse>(
         `/seasons/now?page=${page}&limit=25&sfw=true`,
         3600,
       );
-
-      anime.forEach((show) => {
+      data.forEach((show) => {
         if (!seenIds.has(show.mal_id)) {
-          allAnime.push(show);
           seenIds.add(show.mal_id);
+          allAnime.push(show);
         }
       });
     } catch (err) {
-      // Jikan unreachable from the server: stop immediately (don't make the
-      // visitor wait) and let the browser load the list instead.
       console.error(`Failed to load seasonal page ${page}:`, err);
       break;
     }
-
     await delay(300);
   }
 
-  const chunked: Anime[][] = [];
-  for (let i = 0; i < allAnime.length; i += 24) {
-    chunked.push(allAnime.slice(i, i + 24));
-  }
-  return chunked;
+  return chunk24(allAnime);
 };
 
-// Browser-side fallback: used when the server couldn't reach Jikan.
+// Browser fallback when the server couldn't load the list.
 export const getSeasonalAnimeClient = async (): Promise<Anime[]> => {
   const all: Anime[] = [];
   const seen = new Set<number>();
 
   for (let page = 1; page <= 4; page++) {
     try {
-      const res = await fetch(
-        `${JIKAN_BASE}/seasons/now?page=${page}&limit=25&sfw=true`,
+      const { data } = await fetchClient<AnimeResponse>(
+        `/seasons/now?page=${page}&limit=25&sfw=true`,
       );
-      if (!res.ok) break;
-      const json = (await res.json()) as AnimeResponse;
-      json.data.forEach((show) => {
+      data.forEach((show) => {
         if (!seen.has(show.mal_id)) {
           seen.add(show.mal_id);
           all.push(show);
@@ -90,64 +98,32 @@ export const getSeasonalAnimeClient = async (): Promise<Anime[]> => {
     } catch {
       break;
     }
-    await delay(400); // stay under Jikan's rate limit
+    await delay(400);
   }
 
   return all;
 };
 
-// Server-side fetch with sequential requests + delay to avoid rate limiting
-export const getPinnedAnime = async (
+// Browser: pinned anime by MAL id. Sequential + small delay to respect rate
+// limits (parallel requests were what dropped random pinned items before).
+export const getAnimeByIdsClient = async (
   ids: readonly number[],
+  onEach?: (anime: Anime) => void,
 ): Promise<Anime[]> => {
   const results: Anime[] = [];
 
   for (const id of ids) {
     try {
-      const res = await fetch(`${JIKAN_BASE}/anime/${id}`, {
-        next: { revalidate: 86400 }, // cache for 24h — pinned titles rarely change
-      });
-
-      if (res.status === 429) {
-        await delay(1000);
-        // retry once
-        const retry = await fetch(`${JIKAN_BASE}/anime/${id}`, {
-          next: { revalidate: 86400 },
-        });
-        if (retry.ok) {
-          const data = await retry.json();
-          if (data.data) results.push(data.data);
-        }
-        continue;
+      const { data } = await fetchClient<{ data: Anime }>(`/anime/${id}`);
+      if (data) {
+        results.push(data);
+        onEach?.(data);
       }
-
-      if (!res.ok) continue;
-
-      const data = await res.json();
-      if (data.data) results.push(data.data);
     } catch {
-      // skip failed individual fetch, don't break the whole list
+      // skip this one, keep the rest
     }
-
-    await delay(350); // stay under Jikan's 3 req/sec limit
+    await delay(350);
   }
 
   return results;
-};
-
-// Keep this for any remaining client-side usage
-export const getAnimeByIdsClient = async (
-  ids: readonly number[],
-): Promise<Anime[]> => {
-  const results = await Promise.allSettled(
-    ids.map((id) =>
-      fetch(`${JIKAN_BASE}/anime/${id}`)
-        .then((r) => r.json())
-        .then((d) => d.data as Anime),
-    ),
-  );
-
-  return results
-    .filter((r) => r.status === "fulfilled")
-    .map((r) => (r as PromiseFulfilledResult<Anime>).value);
 };
