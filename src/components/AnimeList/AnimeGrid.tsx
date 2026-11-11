@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Anime } from "@/types/anime";
 import AnimeCard from "./AnimeCard";
 import { useAnimeFilter } from "@/components/Providers/AnimeFilterContext";
-import { getAnimeByIdsClient } from "@/lib/anime";
+import { getAnimeByIdsClient, getSeasonalAnimeClient } from "@/lib/anime";
 import { setAnimeListCache } from "@/components/Header/SearchCommand";
 import {
   Pagination, PaginationContent, PaginationItem,
@@ -22,7 +22,23 @@ const AnimeGrid = ({
 }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [pinned, setPinned] = useState<Anime[]>([]);
+  const [seasonalList, setSeasonalList] = useState<Anime[]>(initialAnimePages);
+  const [loadingSeasonal, setLoadingSeasonal] = useState(initialAnimePages.length === 0);
   const { selectedGenre, searchQuery } = useAnimeFilter();
+
+  // Server couldn't reach Jikan -> load the seasonal list from the browser
+  useEffect(() => {
+    if (initialAnimePages.length > 0) return;
+    let cancelled = false;
+    getSeasonalAnimeClient().then((data) => {
+      if (cancelled) return;
+      setSeasonalList(data);
+      setLoadingSeasonal(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [initialAnimePages]);
 
   useEffect(() => {
     if (pinnedIds.length === 0) return;
@@ -36,9 +52,9 @@ const AnimeGrid = ({
     const sortedPinned = [...pinned].sort(
       (a, b) => pinnedIds.indexOf(a.mal_id) - pinnedIds.indexOf(b.mal_id)
     );
-    const seasonal = initialAnimePages.filter((a) => a && !pinnedSet.has(a.mal_id));
+    const seasonal = seasonalList.filter((a) => a && !pinnedSet.has(a.mal_id));
     return [...sortedPinned, ...seasonal];
-  }, [pinned, initialAnimePages, pinnedIds]);
+  }, [pinned, seasonalList, pinnedIds]);
 
   // Write full list to search cache whenever allAnime updates
   useEffect(() => {
@@ -93,7 +109,9 @@ const AnimeGrid = ({
       )}
 
       {currentAnime.length === 0 ? (
-        <p className="text-muted-foreground mt-16 text-lg">No anime found.</p>
+        <p className="text-muted-foreground mt-16 text-lg">
+          {loadingSeasonal ? "Loading anime..." : "No anime found."}
+        </p>
       ) : (
         <main className="grid grid-cols-1 place-items-center justify-center items-start lg:grid-cols-2 xl:grid-cols-3 gap-3 mb-4 mx-2 w-full max-w-[1600px] px-2 sm:px-4">
           {currentAnime.map((anime) => (
