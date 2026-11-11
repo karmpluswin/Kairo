@@ -1,7 +1,7 @@
 import { Anime, AnimeResponse } from "@/types/anime";
 
 const JIKAN_BASE = "https://api.jikan.moe/v4";
-const REQUEST_TIMEOUT_MS = 8000;
+const REQUEST_TIMEOUT_MS = 5000;
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 // Resilient Jikan fetch: timeout + retry with backoff on network errors,
@@ -9,7 +9,7 @@ const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const fetchJikan = async <T,>(
   path: string,
   revalidate: number,
-  retries = 3,
+  retries = 1,
 ): Promise<T> => {
   let lastError: unknown;
 
@@ -53,17 +53,13 @@ export const getAnimeList = async (): Promise<Anime[][]> => {
         }
       });
     } catch (err) {
-      // Skip a failed page instead of crashing the whole render
+      // Jikan unreachable from the server: stop immediately (don't make the
+      // visitor wait) and let the browser load the list instead.
       console.error(`Failed to load seasonal page ${page}:`, err);
+      break;
     }
 
     await delay(300);
-  }
-
-  // Nothing at all -> throw, so ISR keeps serving the last good page
-  // instead of caching an empty one.
-  if (allAnime.length === 0) {
-    throw new Error("Jikan unavailable: no seasonal anime loaded");
   }
 
   const chunked: Anime[][] = [];
@@ -71,6 +67,33 @@ export const getAnimeList = async (): Promise<Anime[][]> => {
     chunked.push(allAnime.slice(i, i + 24));
   }
   return chunked;
+};
+
+// Browser-side fallback: used when the server couldn't reach Jikan.
+export const getSeasonalAnimeClient = async (): Promise<Anime[]> => {
+  const all: Anime[] = [];
+  const seen = new Set<number>();
+
+  for (let page = 1; page <= 4; page++) {
+    try {
+      const res = await fetch(
+        `${JIKAN_BASE}/seasons/now?page=${page}&limit=25&sfw=true`,
+      );
+      if (!res.ok) break;
+      const json = (await res.json()) as AnimeResponse;
+      json.data.forEach((show) => {
+        if (!seen.has(show.mal_id)) {
+          seen.add(show.mal_id);
+          all.push(show);
+        }
+      });
+    } catch {
+      break;
+    }
+    await delay(400); // stay under Jikan's rate limit
+  }
+
+  return all;
 };
 
 // Server-side fetch with sequential requests + delay to avoid rate limiting
